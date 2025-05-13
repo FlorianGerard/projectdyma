@@ -2,112 +2,74 @@
 
 namespace App\Controller;
 
-use App\Services\MyLog;
-use Psr\Container\ContainerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\HttpFoundation\JsonResponse;
+use App\Form\TodoType;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\CountryType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 // #[Route(path:'/blog', name:'blog_')]
+
 class DefaultController extends AbstractController
 {
 
-    #[Route('/')]
-    public function index(string $adminEmail, ContainerInterface $container)
+    // Cours 8.49 Utiliser des objets avec les formulaires
+
+    function __construct() {}
+
+    #[Route('/', name: 'index')]
+    public function index(Request $request, RequestStack $rs)
     {
 
-        $form = $this->createFormBuilder()
-            ->add('content', TextType::class)
-            ->add('submit', SubmitType::class)
-            ->getForm(); 
 
-        // $mylog = $container->get('App\\Services\\MyLog');
-        // $mylog->writenLog('machin'); 
+        // dump($session);
+        //$session->set('myvar', 123);
+        // dump($session->get('myvar'));
+        // dump($session->get('test', 'ola'));
+        // dd($session);
+        $todo = new Todo(['techno'], 'Je suis une todo');
 
-        // $this->fs->mkdir('photos');
-        // $this->fs->touch('photos/test.txt');
-        // $this->fs->appendToFile('photos/test.txt', 'Je suis un poulet au curry');
+        $form = $this->createForm(TodoType::class);
+        $form->handleRequest($request);
 
-        // $user = [
-        //     'name' => 'Jean',
-        //     'email' => 'jean@gmail.com'
-        // ];
+        if ($form->isSubmitted() && $form->isValid()) {
+            $this->addFlash('success', 'Vous avez ajouté une todo');
+            $this->addFlash('info', 'Info');
+            $this->addFlash('success', 'Vous avez ajouté une todo3');
+        }
 
-        // $product = [
-        //     'name' => 'Voiture Tesla',
-        //     'price' => 50000,
-        //     'lastUpdate' => strtotime('yesterday')
-        // ];
-
-        // return $this->render('test.html.twig', [
-        //     'product' => $product,
-        //     'h1' => '<h1>hello</h1>',
-        //     'author' => $user
-        // ]);
-
-        return $this->render(
-            'page1.html.twig',
-            [
-                'myform' => $form->createView()
-            ]
-        );
-
-        // return $this->render('@email/email_welcome.html.twig');
-        //dd($request);
-
-        // $response = new Response('<h1>Hello World!</h1>'); // réponse html
-        // $response = new JsonResponse(['salut' => 'ca va']); // réponse au format JSON change le header content-type
-        // return $response;
+        return $this->render('page1.html.twig', [
+            'myform' => $form->createView()
+        ]);
     }
+}
 
-    // #[
-    //     Route(
-    //         path: '/{name}',
-    //         name: 'blog',
-    //         methods: ["GET", "PUT", "DELETE"],
-    //         schemes: ["HTTPS"],
-    //         defaults: [
-    //             'name' => '', // params par défaut si path {name} n'existe pas
-    //             'foo' => 'bar'
-    //         ],
-    //         requirements: [
-    //             'name' => '[a-zA-Z]+'
-    //         ]
-    //     )
-    // ]
-    // public function blog(Request $request)
-    // {
 
-    //     $title = $request->attributes->get('name');
-    //     dd($request);
-    //     $allRouteParams = $request->attributes->all();
-    //     $allParam = $request->attributes->get('_route_params');
+class Todo
+{
+    function  __construct(
+        #[Assert\Choice(
+            choices: ['techno', 'nature'],
+            message: 'mauvaise valeur',
+            multiple: true,
+            multipleMessage: 'une des valeurs n\'est pas valide',
+        )]
+        public array $type,
+        #[Assert\Email(message: 'Adresse email non valide')]
+        #[Assert\NotBlank(message: 'Je ne peux pas être vide')]
+        #[Assert\Length(
+            min: 5,
+            max: 20,
+            minMessage: 'Trop court',
+            maxMessage: 'Trop long'
+        )]
+        public ?string $content,
 
-    //     return new Response('Blog');
-    // }
-
-    // #[
-    //     Route(
-    //         path: '/homepage',
-    //         name: 'homepage',
-    //         methods: ["GET"],
-    //         schemes: ["HTTPS"],
-    //         priority: 1
-    //     )
-    // ]
-    // public function blogHomepage()
-    // {
-    //     return new Response('blog homepage');
-
-    // }
-    #[Route(path: 'about/list/{name}', name: 'about')]
-    public function aboutList($name)
-    {
-        dd($name);
-        return $this->render('base.html.twig');
-    }
+        public bool $done = false
+    ) {}
 }

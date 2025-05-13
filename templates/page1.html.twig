@@ -1,7 +1,48 @@
 {% extends "./layout.html.twig" %}
 
 {% block content %}
-<h1>Je suis la page 1</h1>
-{{ form(myform) }}
-{{ render(controller('App\\Controller\\BlogController::lastBlogPost')) }}
+<style>
+.form-container {
+    display:flex;
+    flex-flow:column;
+}
+.form-row{
+    margin-bottom:15px;
+    display:flex;
+    flex-flow:column;
+}
+.form-row label{
+    font-weight:700;
+    font-size:14px;
+    margin-bottom:5px;
+}
+.form-row input {
+    background: #eee;
+    border:0;
+    border-radius:3px;
+    padding:10px 15px;
+}
+.btn {
+    padding:10px 15px;
+    color:white;
+    border:0;
+    border-radius:3px;
+    background-color:#2980b9;
+    color:white;
+}
+.form-row ul {
+    list-style:none;
+
+}
+.form-row ul li {
+    color: red;
+}
+</style>
+    {{ form_start(myform) }}
+    <div class="form-container">
+        {{ form_row(myform.content, {'row_attr': {'class': 'form-row'} }) }}
+        {{ form_row(myform.pays, {'row_attr': {'class': 'form-row'} }) }}
+        <button type="submit" class="btn btn-primary">Sauvegarder</button>
+    </div>
+    {{ form_end(myform) }}
 {% endblock %}
