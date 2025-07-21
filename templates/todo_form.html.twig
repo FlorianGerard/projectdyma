@@ -38,11 +38,10 @@
     color: red;
 }
 </style>
-    {{ form_start(myform) }}
+    {{ form_start(form) }}
     <div class="form-container">
-        {{ form_row(myform.content, {'row_attr': {'class': 'form-row'} }) }}
-        {{ form_row(myform.pays, {'row_attr': {'class': 'form-row'} }) }}
+        {{ form_rest(form) }}
         <button type="submit" class="btn btn-primary">Sauvegarder</button>
     </div>
-    {{ form_end(myform) }}
+    {{ form_end(form) }}
 {% endblock %}
